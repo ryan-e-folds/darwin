@@ -90,16 +90,19 @@ class Creature:
             if other is None or not other.reproduce_sexually:
                 return None
             child_genome = self.genome.crossover(other.genome)
+            # Share energy with child from both parents
+            child_energy = (self.energy / 2) + (other.energy / 2)
+            self.energy /= 2
+            other.energy /= 2
         else:
             if other is not None:
                 return None
             child_genome = Genome(self.traits_copy())
+            # Share energy with child
+            child_energy = self.energy / 2
+            self.energy /= 2
 
         mutated_genome = child_genome.mutate()
-
-        # Share energy with child
-        child_energy = self.energy / 2
-        self.energy /= 2
 
         return self.__class__(
             genome=mutated_genome,

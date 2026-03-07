@@ -53,9 +53,28 @@ def test_environment_handle_eating() -> None:
 
     consumed = env.handle_eating(detection_radius=2.0)
 
+    # size 0.5, so min(0.5, 20.0) = 0.5 eaten. 19.5 remains. 0 items fully consumed.
+    assert consumed == 0
+    assert len(env.food_sources) == 2
+    assert any(f.energy == 19.5 for f in env.food_sources)
+    assert creature.energy == 10.5
+
+
+def test_environment_handle_eating_capped() -> None:
+    """Tests that creatures are capped by food energy."""
+    env = Environment(100, 100)
+    # size 1.5, but food only has 0.1 energy
+    creature = Creature(Genome({"size": 1.5, "speed": 0.0, "strength": 0.0}), x=50, y=50, energy=10)
+    env.add_creature(creature)
+
+    env.food_sources.append(Food(50.0, 50.0, 0.1))
+    consumed = env.handle_eating()
+
+    # energy = 10 (initial) + min(1.5, 0.1) = 10.1
+    # food is fully consumed because 1.5 > 0.1
     assert consumed == 1
-    assert len(env.food_sources) == 1
-    assert creature.energy == 30.0
+    assert creature.energy == 10.1
+    assert len(env.food_sources) == 0
 
 
 def test_environment_update_cleanup() -> None:
