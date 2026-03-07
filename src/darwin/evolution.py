@@ -52,7 +52,8 @@ class Evolution:
         for creature in self.environment.creatures:
             if creature.energy > 150:
                 child = creature.reproduce()
-                new_borns.append(child)
+                if child is not None:
+                    new_borns.append(child)
 
         for baby in new_borns:
             self.environment.add_creature(baby)
@@ -80,11 +81,15 @@ class Evolution:
             return {"population": 0}
 
         avg_speed = sum(c.speed for c in creatures) / len(creatures)
+        avg_size = sum(c.size for c in creatures) / len(creatures)
+        avg_strength = sum(c.strength for c in creatures) / len(creatures)
         avg_energy = sum(c.energy for c in creatures) / len(creatures)
 
         return {
             "generation": self.generation,
             "population": len(creatures),
             "avg_speed": avg_speed,
+            "avg_size": avg_size,
+            "avg_strength": avg_strength,
             "avg_energy": avg_energy,
         }

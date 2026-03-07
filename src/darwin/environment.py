@@ -41,17 +41,25 @@ class Environment:
         """
         self.creatures.append(creature)
 
-    def spawn_food(self, amount: int = 1, energy_value: float = 20.0) -> None:
+    def spawn_food(self, amount: int = 1, energy_value: float | None = None) -> None:
         """Randomly spawns food within the environment bounds.
 
         Args:
             amount (int): Number of food items to spawn.
-            energy_value (float): Energy provided by each food item.
+            energy_value (float | None): Energy provided by each food item.
+                If None, a base of 20.0 with random noise (+/- 5.0) is used.
         """
         for _ in range(amount):
             x = random.uniform(0, self.width)
             y = random.uniform(0, self.height)
-            self.food_sources.append(Food(x, y, energy_value))
+            
+            if energy_value is None:
+                # Base energy with noise
+                current_energy = 20.0 + random.uniform(-5, 5)
+            else:
+                current_energy = energy_value
+                
+            self.food_sources.append(Food(x, y, current_energy))
 
     def update(self) -> None:
         """Performs one simulation step.
