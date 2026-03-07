@@ -12,8 +12,8 @@ def test_environment_init() -> None:
     assert len(env.food_sources) == 0
 
 
-def test_environment_spawn_food() -> None:
-    """Tests that food spawns within bounds."""
+def test_environment_spawn_food_fixed() -> None:
+    """Tests that food spawns with fixed energy value when provided."""
     env = Environment(100, 100)
     env.spawn_food(amount=10, energy_value=15.0)
 
@@ -22,6 +22,22 @@ def test_environment_spawn_food() -> None:
         assert 0 <= food.x <= 100
         assert 0 <= food.y <= 100
         assert food.energy == 15.0
+
+
+def test_environment_spawn_food_random() -> None:
+    """Tests that food spawns with random noise when energy_value is None."""
+    env = Environment(100, 100)
+    env.spawn_food(amount=100)  # Default is None
+
+    assert len(env.food_sources) == 100
+    energies = [food.energy for food in env.food_sources]
+    
+    # Check that all energies are within the noise range [15, 25]
+    for energy in energies:
+        assert 15.0 <= energy <= 25.0
+    
+    # Check that it's not all exactly 20.0 (very likely with 100 samples)
+    assert any(e != 20.0 for e in energies)
 
 
 def test_environment_handle_eating() -> None:

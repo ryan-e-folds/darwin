@@ -10,10 +10,16 @@ class Creature:
         energy (float): Current energy levels. If it reaches 0, the creature dies.
         x (float): X-coordinate in the environment.
         y (float): Y-coordinate in the environment.
+        reproduce_sexually (bool): Whether the creature reproduces sexually.
     """
 
     def __init__(
-        self, genome: Genome, energy: float = 100.0, x: float = 0.0, y: float = 0.0
+        self,
+        genome: Genome,
+        energy: float = 100.0,
+        x: float = 0.0,
+        y: float = 0.0,
+        reproduce_sexually: bool = False,
     ) -> None:
         """Initializes a Creature.
 
@@ -22,11 +28,13 @@ class Creature:
             energy (float): Starting energy.
             x (float): Initial x position.
             y (float): Initial y position.
+            reproduce_sexually (bool): True if sexual reproduction is required.
         """
         self.genome = genome
         self.energy = energy
         self.x = x
         self.y = y
+        self.reproduce_sexually = reproduce_sexually
 
     @property
     def speed(self) -> float:
@@ -65,7 +73,7 @@ class Creature:
         """
         self.energy += amount
 
-    def reproduce(self, other: Self | None = None) -> Self:
+    def reproduce(self, other: Self | None = None) -> Self | None:
         """Creates a child creature.
 
         If 'other' is provided, performs sexual reproduction (crossover).
@@ -76,11 +84,15 @@ class Creature:
             other (Self | None): Optional partner for reproduction.
 
         Returns:
-            Self: A new Creature instance.
+            Self | None: A new Creature instance, or None if the mode mismatch occurs.
         """
-        if other:
+        if self.reproduce_sexually:
+            if other is None:
+                return None
             child_genome = self.genome.crossover(other.genome)
         else:
+            if other is not None:
+                return None
             child_genome = Genome(self.traits_copy())
 
         mutated_genome = child_genome.mutate()
@@ -90,7 +102,11 @@ class Creature:
         self.energy /= 2
 
         return self.__class__(
-            genome=mutated_genome, energy=child_energy, x=self.x, y=self.y
+            genome=mutated_genome,
+            energy=child_energy,
+            x=self.x,
+            y=self.y,
+            reproduce_sexually=self.reproduce_sexually,
         )
 
     def traits_copy(self) -> dict[str, float]:
@@ -106,5 +122,6 @@ class Creature:
         return (
             f"Creature(energy={self.energy:.1f}, "
             f"pos=({self.x:.1f}, {self.y:.1f}), "
-            f"speed={self.speed:.2f})"
+            f"speed={self.speed:.2f}, "
+            f"sexual={self.reproduce_sexually})"
         )

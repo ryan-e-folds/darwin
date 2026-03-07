@@ -52,7 +52,8 @@ class Evolution:
         for creature in self.environment.creatures:
             if creature.energy > 150:
                 child = creature.reproduce()
-                new_borns.append(child)
+                if child is not None:
+                    new_borns.append(child)
 
         for baby in new_borns:
             self.environment.add_creature(baby)
