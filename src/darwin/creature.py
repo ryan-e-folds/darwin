@@ -87,7 +87,7 @@ class Creature:
             Self | None: A new Creature instance, or None if the mode mismatch occurs.
         """
         if self.reproduce_sexually:
-            if other is None:
+            if other is None or not other.reproduce_sexually:
                 return None
             child_genome = self.genome.crossover(other.genome)
         else:

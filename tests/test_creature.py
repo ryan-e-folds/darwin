@@ -68,7 +68,7 @@ def test_creature_reproduce_sexual() -> None:
     genome1 = Genome({"speed": 1.5, "size": 0.0, "strength": 0.0})
     genome2 = Genome({"speed": 0.0, "size": 1.5, "strength": 0.0})
     parent1 = Creature(genome1, energy=100.0, reproduce_sexually=True)
-    parent2 = Creature(genome2, energy=100.0)
+    parent2 = Creature(genome2, energy=100.0, reproduce_sexually=True)
 
     child = parent1.reproduce(parent2)
 
@@ -83,6 +83,13 @@ def test_creature_reproduce_sexual_mismatch() -> None:
     """Tests that sexual creature returns None if no partner is provided."""
     creature = Creature(Genome(), reproduce_sexually=True)
     assert creature.reproduce() is None
+
+
+def test_creature_reproduce_sexual_asexual_mismatch() -> None:
+    """Tests that sexual creature returns None if partner is asexual."""
+    parent1 = Creature(Genome(), reproduce_sexually=True)
+    parent2 = Creature(Genome(), reproduce_sexually=False)
+    assert parent1.reproduce(parent2) is None
 
 
 def test_creature_is_alive() -> None:
