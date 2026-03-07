@@ -74,7 +74,8 @@ def test_creature_reproduce_sexual() -> None:
 
     assert child is not None
     assert parent1.energy == 50.0
-    assert child.energy == 50.0
+    assert parent2.energy == 50.0
+    assert child.energy == 100.0
     assert child.reproduce_sexually is True
     assert sum(child.genome.traits.values()) == pytest.approx(1.5)
 

@@ -1,11 +1,11 @@
 import random
-from typing import NamedTuple
+from dataclasses import dataclass
 from darwin.creature import Creature
 
 
-class Food(NamedTuple):
+@dataclass
+class Food:
     """Represents a food source in the environment."""
-
     x: float
     y: float
     energy: float
@@ -75,28 +75,36 @@ class Environment:
     def handle_eating(self, detection_radius: float = 2.0) -> int:
         """Creatures eat food if they are within the detection radius.
 
+        A creature eats an amount equal to its size (capped by food energy),
+        which reduces the food's energy. Food is only removed when its
+        energy reaches 0. Multiple creatures can eat from the same food
+        source in one step.
+
         Args:
             detection_radius (float): Distance within which a creature can eat food.
 
         Returns:
-            int: Total number of food items consumed.
+            int: Total number of food items fully consumed (energy reaches 0).
         """
         consumed_count = 0
         remaining_food = []
 
         for food in self.food_sources:
-            eaten = False
             for creature in self.creatures:
                 distance = (
                     (creature.x - food.x) ** 2 + (creature.y - food.y) ** 2
                 ) ** 0.5
                 if distance <= detection_radius:
-                    creature.eat(food.energy)
-                    eaten = True
+                    # Amount eaten is the smallest of creature size or food energy
+                    amount_to_eat = min(creature.size, food.energy)
+                    creature.eat(amount_to_eat)
+                    food.energy -= amount_to_eat
+                    
+                if food.energy <= 1e-9: # Effectively consumed
                     consumed_count += 1
                     break
 
-            if not eaten:
+            if food.energy > 1e-9:
                 remaining_food.append(food)
 
         self.food_sources = remaining_food
