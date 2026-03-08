@@ -4,30 +4,30 @@ import pytest
 
 def test_evolution_init() -> None:
     """Tests that Evolution initializes correctly."""
-    sim = Evolution(width=100, height=100)
-    assert sim.steps == 0
-    assert len(sim.environment.creatures) == 0
-    assert sim.history == []
+    evo = Evolution(width=100, height=100)
+    assert evo.steps == 0
+    assert len(evo.environment.creatures) == 0
+    assert evo.history == []
 
 
 def test_evolution_seed_population() -> None:
     """Tests seeding the population."""
-    sim = Evolution()
+    evo = Evolution()
     # speed: 0.5, size: 0.0, strength: 0.0 -> normalized to 1.5, 0.0, 0.0
-    sim.seed_population(count=10, initial_traits={"speed": 0.5})
-    assert len(sim.environment.creatures) == 10
-    for creature in sim.environment.creatures:
+    evo.seed_population(count=10, initial_traits={"speed": 0.5})
+    assert len(evo.environment.creatures) == 10
+    for creature in evo.environment.creatures:
         assert creature.speed == pytest.approx(1.5)
 
 
 def test_evolution_seed_population_random_sexuality() -> None:
     """Tests that reproduce_sexually is randomly assigned."""
-    sim = Evolution()
+    evo = Evolution()
     # Seed a large enough population to almost guarantee both True and False
-    sim.seed_population(count=100, initial_traits={"speed": 0.5})
+    evo.seed_population(count=100, initial_traits={"speed": 0.5})
     
-    sexual_count = sum(1 for c in sim.environment.creatures if c.reproduce_sexually)
-    asexual_count = sum(1 for c in sim.environment.creatures if not c.reproduce_sexually)
+    sexual_count = sum(1 for c in evo.environment.creatures if c.reproduce_sexually)
+    asexual_count = sum(1 for c in evo.environment.creatures if not c.reproduce_sexually)
     
     assert sexual_count > 0
     assert asexual_count > 0
@@ -35,10 +35,10 @@ def test_evolution_seed_population_random_sexuality() -> None:
 
 def test_evolution_seed_population_energy_noise() -> None:
     """Tests that starting energy has random noise."""
-    sim = Evolution()
-    sim.seed_population(count=100, initial_traits={"speed": 0.5})
+    evo = Evolution()
+    evo.seed_population(count=100, initial_traits={"speed": 0.5})
     
-    energies = [c.energy for c in sim.environment.creatures]
+    energies = [c.energy for c in evo.environment.creatures]
     
     # Check that all energies are within [90, 110]
     for energy in energies:
@@ -50,24 +50,24 @@ def test_evolution_seed_population_energy_noise() -> None:
 
 def test_evolution_step() -> None:
     """Tests that a simulation step updates state."""
-    sim = Evolution()
-    sim.seed_population(count=5, initial_traits={"speed": 0.5, "size": 0.5, "strength": 0.5})
-    initial_energy = sum(c.energy for c in sim.environment.creatures)
+    evo = Evolution()
+    evo.seed_population(count=5, initial_traits={"speed": 0.5, "size": 0.5, "strength": 0.5})
+    initial_energy = sum(c.energy for c in evo.environment.creatures)
 
-    sim.step()
+    evo.step()
 
     # Energy should have changed (likely decreased due to movement)
-    new_energy = sum(c.energy for c in sim.environment.creatures)
+    new_energy = sum(c.energy for c in evo.environment.creatures)
     assert new_energy != initial_energy
 
 
 def test_evolution_stats() -> None:
     """Tests that stats are calculated correctly."""
-    sim = Evolution()
+    evo = Evolution()
     # speed: 0.6, size: 0.4, strength: 0.5 -> sum 1.5, already normalized
-    sim.seed_population(count=2, initial_traits={"speed": 0.6, "size": 0.4, "strength": 0.5})
+    evo.seed_population(count=2, initial_traits={"speed": 0.6, "size": 0.4, "strength": 0.5})
 
-    stats = sim.stats
+    stats = evo.stats
     assert stats["population"] == 2
     assert stats["avg_speed"] == pytest.approx(0.6)
     assert stats["avg_size"] == pytest.approx(0.4)
@@ -77,13 +77,13 @@ def test_evolution_stats() -> None:
 
 def test_evolution_run_and_history() -> None:
     """Tests that run executes steps and records history."""
-    sim = Evolution()
-    sim.seed_population(count=5, initial_traits={"speed": 0.5})
+    evo = Evolution()
+    evo.seed_population(count=5, initial_traits={"speed": 0.5})
     
-    sim.run(steps=5, food_spawn_rate=2)
+    evo.run(steps=5, food_spawn_rate=2)
     
-    assert sim.steps == 5
-    assert len(sim.history) == 5
-    for i, entry in enumerate(sim.history):
+    assert evo.steps == 5
+    assert len(evo.history) == 5
+    for i, entry in enumerate(evo.history):
         assert entry["step"] == i + 1
         assert "population" in entry
