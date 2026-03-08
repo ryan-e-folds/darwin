@@ -75,6 +75,18 @@ def test_evolution_stats() -> None:
     assert "avg_energy" in stats
 
 
+def test_evolution_seed_population_no_traits() -> None:
+    """Tests seeding the population without providing initial traits."""
+    evo = Evolution()
+    evo.seed_population(count=5)
+    assert len(evo.environment.creatures) == 5
+    for creature in evo.environment.creatures:
+        # Core traits should be initialized equally (1.5 / 3 = 0.5)
+        assert creature.speed == pytest.approx(0.5)
+        assert creature.size == pytest.approx(0.5)
+        assert creature.strength == pytest.approx(0.5)
+
+
 def test_evolution_run_and_history() -> None:
     """Tests that run executes steps and records history."""
     evo = Evolution()

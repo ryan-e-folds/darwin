@@ -24,15 +24,16 @@ class Evolution:
         self.steps = 0
         self.history: list[dict[str, float]] = []
 
-    def seed_population(self, count: int, initial_traits: dict[str, float]) -> None:
+    def seed_population(self, count: int, initial_traits: dict[str, float] | None = None) -> None:
         """Creates an initial population of creatures with random positions and energy.
 
         Args:
             count (int): Number of creatures to spawn.
-            initial_traits (dict[str, float]): Starting traits for all creatures.
+            initial_traits (dict[str, float] | None): Starting traits for all creatures.
         """
         for _ in range(count):
-            genome = Genome(initial_traits.copy())
+            traits = initial_traits.copy() if initial_traits is not None else None
+            genome = Genome(traits)
             x = random.uniform(0, self.environment.width)
             y = random.uniform(0, self.environment.height)
             reproduce_sexually = random.choice([True, False])
