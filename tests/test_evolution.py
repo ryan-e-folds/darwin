@@ -5,8 +5,9 @@ import pytest
 def test_evolution_init() -> None:
     """Tests that Evolution initializes correctly."""
     sim = Evolution(width=100, height=100)
-    assert sim.generation == 0
+    assert sim.steps == 0
     assert len(sim.environment.creatures) == 0
+    assert sim.history == []
 
 
 def test_evolution_seed_population() -> None:
@@ -72,3 +73,17 @@ def test_evolution_stats() -> None:
     assert stats["avg_size"] == pytest.approx(0.4)
     assert stats["avg_strength"] == pytest.approx(0.5)
     assert "avg_energy" in stats
+
+
+def test_evolution_run_and_history() -> None:
+    """Tests that run executes steps and records history."""
+    sim = Evolution()
+    sim.seed_population(count=5, initial_traits={"speed": 0.5})
+    
+    sim.run(steps=5, food_spawn_rate=2)
+    
+    assert sim.steps == 5
+    assert len(sim.history) == 5
+    for i, entry in enumerate(sim.history):
+        assert entry["step"] == i + 1
+        assert "population" in entry
