@@ -1,3 +1,4 @@
+import random
 from typing import Self
 from darwin.genome import Genome
 
@@ -111,6 +112,35 @@ class Creature:
             y=self.y,
             reproduce_sexually=self.reproduce_sexually,
         )
+
+    def fight(self, other: Self) -> bool:
+        """Fights another creature.
+
+        The chance of winning increases with self.strength and decreases with other.speed.
+        If this creature wins, it takes half of the other's energy.
+        If it loses, it loses half of its own energy (which goes to the other).
+
+        Args:
+            other (Self): The creature to fight.
+
+        Returns:
+            bool: True if this creature won the fight, False otherwise.
+        """
+        # Chance of winning: attacker strength vs defender speed
+        win_probability = self.strength / (self.strength + other.speed)
+
+        if random.random() < win_probability:
+            # Win! Take half of defender's energy
+            energy_gain = other.energy / 2
+            self.energy += energy_gain
+            other.energy -= energy_gain
+            return True
+        else:
+            # Loss! Lose half of own energy to defender
+            energy_loss = self.energy / 2
+            other.energy += energy_loss
+            self.energy -= energy_loss
+            return False
 
     def traits_copy(self) -> dict[str, float]:
         """Returns a copy of the genome's traits."""

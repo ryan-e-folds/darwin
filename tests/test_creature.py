@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from darwin.creature import Creature
 from darwin.genome import Genome
 import pytest
@@ -100,3 +101,35 @@ def test_creature_is_alive() -> None:
     creature.move(10.0, 10.0)  # Should consume all energy
     assert creature.energy <= 0
     assert creature.is_alive is False
+
+
+def test_creature_fight_win() -> None:
+    """Tests that a creature gains energy when winning a fight."""
+    # attacker: strength=1.0, speed=0.0, size=0.5 (normalized)
+    # defender: strength=0.0, speed=1.0, size=0.5 (normalized)
+    attacker = Creature(Genome({"strength": 1.0, "speed": 0.0, "size": 0.5}), energy=100.0)
+    defender = Creature(Genome({"strength": 0.0, "speed": 1.0, "size": 0.5}), energy=100.0)
+
+    # win_prob = 1.0 / (1.0 + 1.0) = 0.5
+    # Force win by mocking random.random() to return 0.4
+    with patch("random.random", return_value=0.4):
+        won = attacker.fight(defender)
+
+    assert won is True
+    assert attacker.energy == 150.0
+    assert defender.energy == 50.0
+
+
+def test_creature_fight_loss() -> None:
+    """Tests that a creature loses energy when losing a fight."""
+    attacker = Creature(Genome({"strength": 1.0, "speed": 0.0, "size": 0.5}), energy=100.0)
+    defender = Creature(Genome({"strength": 0.0, "speed": 1.0, "size": 0.5}), energy=100.0)
+
+    # win_prob = 1.0 / (1.0 + 1.0) = 0.5
+    # Force loss by mocking random.random() to return 0.6
+    with patch("random.random", return_value=0.6):
+        won = attacker.fight(defender)
+
+    assert won is False
+    assert attacker.energy == 50.0
+    assert defender.energy == 150.0
