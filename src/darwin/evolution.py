@@ -131,7 +131,7 @@ class Evolution:
         for baby in new_borns:
             self.environment.add_creature(baby)
 
-    def run(self, steps: int = 100, food_spawn_rate: int = 5) -> None:
+    def run(self, steps: int = 100, food_spawn_rate: int = 10) -> None:
         """Runs the simulation for a fixed number of steps.
 
         Args:

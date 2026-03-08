@@ -14,7 +14,7 @@ class Genome:
 
     # Traits that are subject to normalization trade-offs
     CORE_TRAITS = {"speed", "size", "strength"}
-    TRAIT_BUDGET = 1.5
+    TRAIT_BUDGET = 3.0
 
     def __init__(self, traits: dict[str, float] | None = None) -> None:
         """Initializes the Genome with given traits and normalizes them.

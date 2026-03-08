@@ -13,11 +13,11 @@ def test_evolution_init() -> None:
 def test_evolution_seed_population() -> None:
     """Tests seeding the population."""
     evo = Evolution()
-    # speed: 0.5, size: 0.0, strength: 0.0 -> normalized to 1.5, 0.0, 0.0
+    # speed: 0.5, size: 0.0, strength: 0.0 -> normalized to 3.0, 0.0, 0.0
     evo.seed_population(count=10, initial_traits={"speed": 0.5})
     assert len(evo.environment.creatures) == 10
     for creature in evo.environment.creatures:
-        assert creature.speed == pytest.approx(1.5)
+        assert creature.speed == pytest.approx(3.0)
 
 
 def test_evolution_seed_population_random_sexuality() -> None:
@@ -54,7 +54,7 @@ def test_evolution_step() -> None:
     """Tests that a simulation step updates state."""
     evo = Evolution()
     evo.seed_population(
-        count=5, initial_traits={"speed": 0.5, "size": 0.5, "strength": 0.5}
+        count=5, initial_traits={"speed": 1.0, "size": 1.0, "strength": 1.0}
     )
     initial_energy = sum(c.energy for c in evo.environment.creatures)
 
@@ -68,16 +68,18 @@ def test_evolution_step() -> None:
 def test_evolution_stats() -> None:
     """Tests that stats are calculated correctly."""
     evo = Evolution()
-    # speed: 0.6, size: 0.4, strength: 0.5 -> sum 1.5, already normalized
+    # speed: 0.6, size: 0.4, strength: 0.5 -> sum 1.5.
+    # Factor = 3.0 / 1.5 = 2.0.
+    # Normalized: 1.2, 0.8, 1.0.
     evo.seed_population(
         count=2, initial_traits={"speed": 0.6, "size": 0.4, "strength": 0.5}
     )
 
     stats = evo.stats
     assert stats["population"] == 2
-    assert stats["avg_speed"] == pytest.approx(0.6)
-    assert stats["avg_size"] == pytest.approx(0.4)
-    assert stats["avg_strength"] == pytest.approx(0.5)
+    assert stats["avg_speed"] == pytest.approx(1.2)
+    assert stats["avg_size"] == pytest.approx(0.8)
+    assert stats["avg_strength"] == pytest.approx(1.0)
     assert "avg_energy" in stats
 
 
@@ -87,16 +89,16 @@ def test_evolution_seed_population_no_traits() -> None:
     evo.seed_population(count=5)
     assert len(evo.environment.creatures) == 5
     for creature in evo.environment.creatures:
-        # Core traits should be initialized equally (1.5 / 3 = 0.5)
-        assert creature.speed == pytest.approx(0.5)
-        assert creature.size == pytest.approx(0.5)
-        assert creature.strength == pytest.approx(0.5)
+        # Core traits should be initialized equally (3.0 / 3 = 1.0)
+        assert creature.speed == pytest.approx(1.0)
+        assert creature.size == pytest.approx(1.0)
+        assert creature.strength == pytest.approx(1.0)
 
 
 def test_evolution_run_and_history() -> None:
     """Tests that run executes steps and records history."""
     evo = Evolution()
-    evo.seed_population(count=5, initial_traits={"speed": 0.5})
+    evo.seed_population(count=5, initial_traits={"speed": 1.0})
 
     evo.run(steps=5, food_spawn_rate=2)
 

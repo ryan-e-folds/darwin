@@ -6,16 +6,16 @@ import pytest
 
 def test_creature_init() -> None:
     """Tests that Creature initializes correctly."""
-    # This will be normalized to sum 1.5
-    genome = Genome({"speed": 0.5, "size": 0.5, "strength": 0.5})
+    # This will be normalized to sum 3.0
+    genome = Genome({"speed": 1.0, "size": 1.0, "strength": 1.0})
     creature = Creature(genome, energy=50.0, x=10.0, y=20.0, reproduce_sexually=True)
 
     assert creature.genome == genome
     assert creature.energy == 50.0
     assert creature.x == 10.0
     assert creature.y == 20.0
-    assert creature.speed == pytest.approx(0.5)
-    assert creature.strength == pytest.approx(0.5)
+    assert creature.speed == pytest.approx(1.0)
+    assert creature.strength == pytest.approx(1.0)
     assert creature.reproduce_sexually is True
 
 
@@ -23,10 +23,10 @@ def test_creature_move() -> None:
     """Tests that movement consumes energy and updates position."""
     # This will be normalized:
     # 0.2 + 0.1 + 0.0 (strength default added by Genome) = 0.3
-    # Factor = 1.5 / 0.3 = 5.0
-    # speed = 0.2 * 5.0 = 1.0
-    # size = 0.1 * 5.0 = 0.5
-    # strength = 0.0 * 5.0 = 0.0
+    # Factor = 3.0 / 0.3 = 10.0
+    # speed = 0.2 * 10.0 = 2.0
+    # size = 0.1 * 10.0 = 1.0
+    # strength = 0.0 * 10.0 = 0.0
     genome = Genome({"speed": 0.2, "size": 0.1})
     creature = Creature(genome, energy=100.0)
 
@@ -35,13 +35,13 @@ def test_creature_move() -> None:
     assert creature.x == 3.0
     assert creature.y == 4.0
     # cost = distance + size
-    # cost = 5.0 + 0.5 = 5.5
-    assert creature.energy == 94.5
+    # cost = 5.0 + 1.0 = 6.0
+    assert creature.energy == 94.0
 
 
 def test_creature_reproduce_asexual() -> None:
     """Tests asexual reproduction (cloning)."""
-    genome = Genome({"speed": 0.5, "size": 0.5, "strength": 0.5})
+    genome = Genome({"speed": 1.0, "size": 1.0, "strength": 1.0})
     creature = Creature(genome, energy=100.0, reproduce_sexually=False)
 
     child = creature.reproduce()
@@ -53,7 +53,7 @@ def test_creature_reproduce_asexual() -> None:
     assert child.y == creature.y
     assert child.reproduce_sexually is False
     # Genome should be mutated, but derived from parent and normalized
-    assert sum(child.genome.traits.values()) == pytest.approx(1.5)
+    assert sum(child.genome.traits.values()) == pytest.approx(3.0)
 
 
 def test_creature_reproduce_asexual_mismatch() -> None:
@@ -65,8 +65,8 @@ def test_creature_reproduce_asexual_mismatch() -> None:
 
 def test_creature_reproduce_sexual() -> None:
     """Tests sexual reproduction (crossover)."""
-    genome1 = Genome({"speed": 1.5, "size": 0.0, "strength": 0.0})
-    genome2 = Genome({"speed": 0.0, "size": 1.5, "strength": 0.0})
+    genome1 = Genome({"speed": 3.0, "size": 0.0, "strength": 0.0})
+    genome2 = Genome({"speed": 0.0, "size": 3.0, "strength": 0.0})
     parent1 = Creature(genome1, energy=100.0, reproduce_sexually=True)
     parent2 = Creature(genome2, energy=100.0, reproduce_sexually=True)
 
@@ -75,9 +75,10 @@ def test_creature_reproduce_sexual() -> None:
     assert child is not None
     assert parent1.energy == 50.0
     assert parent2.energy == 50.0
+    # Child inherits 50 from parent1 and 50 from parent2
     assert child.energy == 100.0
     assert child.reproduce_sexually is True
-    assert sum(child.genome.traits.values()) == pytest.approx(1.5)
+    assert sum(child.genome.traits.values()) == pytest.approx(3.0)
 
 
 def test_creature_reproduce_sexual_mismatch() -> None:
@@ -105,16 +106,17 @@ def test_creature_is_alive() -> None:
 
 def test_creature_fight_win() -> None:
     """Tests that a creature gains energy when winning a fight."""
-    # attacker: strength=1.0, speed=0.0, size=0.5 (normalized)
-    # defender: strength=0.0, speed=1.0, size=0.5 (normalized)
+    # attacker: strength=2.0, speed=0.0, size=1.0 (normalized)
+    # defender: strength=0.0, speed=2.0, size=1.0 (normalized)
     attacker = Creature(
-        Genome({"strength": 1.0, "speed": 0.0, "size": 0.5}), energy=100.0
+        Genome({"strength": 2.0, "speed": 0.0, "size": 1.0}), energy=100.0
     )
     defender = Creature(
-        Genome({"strength": 0.0, "speed": 1.0, "size": 0.5}), energy=100.0
+        Genome({"strength": 0.0, "speed": 2.0, "size": 1.0}), energy=100.0
     )
 
-    # win_prob = 1.0 / (1.0 + 1.0) = 0.5
+    # win_prob = attacker.strength / (attacker.strength + defender.speed)
+    # win_prob = 2.0 / (2.0 + 2.0) = 0.5
     # Force win by mocking random.random() to return 0.4
     with patch("random.random", return_value=0.4):
         won = attacker.fight(defender)
@@ -127,13 +129,13 @@ def test_creature_fight_win() -> None:
 def test_creature_fight_loss() -> None:
     """Tests that a creature loses energy when losing a fight."""
     attacker = Creature(
-        Genome({"strength": 1.0, "speed": 0.0, "size": 0.5}), energy=100.0
+        Genome({"strength": 2.0, "speed": 0.0, "size": 1.0}), energy=100.0
     )
     defender = Creature(
-        Genome({"strength": 0.0, "speed": 1.0, "size": 0.5}), energy=100.0
+        Genome({"strength": 0.0, "speed": 2.0, "size": 1.0}), energy=100.0
     )
 
-    # win_prob = 1.0 / (1.0 + 1.0) = 0.5
+    # win_prob = 2.0 / (2.0 + 2.0) = 0.5
     # Force loss by mocking random.random() to return 0.6
     with patch("random.random", return_value=0.6):
         won = attacker.fight(defender)
