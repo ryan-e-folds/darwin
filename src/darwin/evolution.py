@@ -38,12 +38,9 @@ class Evolution:
             genome = Genome(traits)
             x = random.uniform(0, self.environment.width)
             y = random.uniform(0, self.environment.height)
-            reproduce_sexually = random.choice([True, False])
             # Base energy 100.0 with noise
             energy = 100.0 + random.uniform(-10, 10)
-            creature = Creature(
-                genome, energy=energy, x=x, y=y, reproduce_sexually=reproduce_sexually
-            )
+            creature = Creature(genome, energy=energy, x=x, y=y)
             self.environment.add_creature(creature)
 
     def step(self, food_spawn_rate: int = 0) -> None:
@@ -61,10 +58,13 @@ class Evolution:
         # 2. Handle eating
         self.environment.handle_eating()
 
-        # 3. Handle reproduction
+        # 3. Handle fighting
+        self._handle_fighting()
+
+        # 4. Handle reproduction
         self._handle_reproduction()
 
-        # 4. Cleanup dead and update environment
+        # 5. Cleanup dead and update environment
         self.environment.update()
 
         self.steps += 1
@@ -77,10 +77,52 @@ class Evolution:
             dy = random.uniform(-2, 2)
             creature.move(dx, dy)
 
+    def _handle_fighting(self, fight_radius: float = 1.5) -> None:
+        """Handles fighting between nearby creatures.
+
+        Creatures only fight others of the same sex.
+        Each creature can participate in at most one fight per step.
+
+        Args:
+            fight_radius (float): Distance within which creatures will fight.
+        """
+        already_fought = set()
+        creatures = self.environment.creatures
+
+        # Randomize order to avoid positional bias
+        indices = list(range(len(creatures)))
+        random.shuffle(indices)
+
+        for i in indices:
+            creature = creatures[i]
+            if creature in already_fought or not creature.is_alive:
+                continue
+
+            # Look for a nearby opponent
+            for j in indices:
+                opponent = creatures[j]
+                if (
+                    i == j
+                    or opponent in already_fought
+                    or not opponent.is_alive
+                    or creature.sex != opponent.sex
+                ):
+                    continue
+
+                dist = (
+                    (creature.x - opponent.x) ** 2 + (creature.y - opponent.y) ** 2
+                ) ** 0.5
+
+                if dist < fight_radius:
+                    creature.fight(opponent)
+                    already_fought.add(creature)
+                    already_fought.add(opponent)
+                    break
+
     def _handle_reproduction(
         self, energy_threshold: float = 150.0, partner_radius: float = 2.0
     ) -> None:
-        """Handles both sexual and asexual reproduction for creatures.
+        """Handles sexual reproduction for creatures.
 
         Args:
             energy_threshold (float): Minimum energy required to reproduce.
@@ -95,38 +137,32 @@ class Evolution:
                 continue
 
             if creature.energy > energy_threshold:
-                if creature.reproduce_sexually:
-                    # Look for sexual partner nearby
-                    partner = None
-                    for j, potential_partner in enumerate(creatures):
-                        if i == j or potential_partner in already_reproduced:
-                            continue
-                        if (
-                            not potential_partner.reproduce_sexually
-                            or potential_partner.energy <= energy_threshold
-                        ):
-                            continue
+                # Look for sexual partner nearby
+                partner = None
+                for j, potential_partner in enumerate(creatures):
+                    if (
+                        i == j
+                        or potential_partner in already_reproduced
+                        or potential_partner.sex == creature.sex
+                    ):
+                        continue
+                    if potential_partner.energy <= energy_threshold:
+                        continue
 
-                        dist = (
-                            (creature.x - potential_partner.x) ** 2
-                            + (creature.y - potential_partner.y) ** 2
-                        ) ** 0.5
-                        if dist < partner_radius:
-                            partner = potential_partner
-                            break
+                    dist = (
+                        (creature.x - potential_partner.x) ** 2
+                        + (creature.y - potential_partner.y) ** 2
+                    ) ** 0.5
+                    if dist < partner_radius:
+                        partner = potential_partner
+                        break
 
-                    if partner:
-                        child = creature.reproduce(partner)
-                        if child is not None:
-                            new_borns.append(child)
-                            already_reproduced.add(creature)
-                            already_reproduced.add(partner)
-                else:
-                    # Asexual reproduction
-                    child = creature.reproduce()
+                if partner:
+                    child = creature.reproduce(partner)
                     if child is not None:
                         new_borns.append(child)
                         already_reproduced.add(creature)
+                        already_reproduced.add(partner)
 
         for baby in new_borns:
             self.environment.add_creature(baby)
