@@ -23,7 +23,8 @@ from darwin.evolution import Evolution
 
 evo = Evolution(width=50, height=50)
 evo.seed_population(count=5, initial_traits={"speed": 0.5})
-evo.run_generation(steps=1)
+evo.run(steps=10)
 
 print(evo.stats)
+print(evo.history)
 ```

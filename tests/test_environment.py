@@ -31,11 +31,11 @@ def test_environment_spawn_food_random() -> None:
 
     assert len(env.food_sources) == 100
     energies = [food.energy for food in env.food_sources]
-    
+
     # Check that all energies are within the noise range [15, 25]
     for energy in energies:
         assert 15.0 <= energy <= 25.0
-    
+
     # Check that it's not all exactly 20.0 (very likely with 100 samples)
     assert any(e != 20.0 for e in energies)
 
@@ -43,6 +43,7 @@ def test_environment_spawn_food_random() -> None:
 def test_environment_handle_eating() -> None:
     """Tests that creatures eat food when close enough."""
     env = Environment(100, 100)
+    # Default Genome has size 1.0 with TRAIT_BUDGET=3.0
     creature = Creature(Genome(), x=50, y=50, energy=10)
     env.add_creature(creature)
 
@@ -53,25 +54,27 @@ def test_environment_handle_eating() -> None:
 
     consumed = env.handle_eating(detection_radius=2.0)
 
-    # size 0.5, so min(0.5, 20.0) = 0.5 eaten. 19.5 remains. 0 items fully consumed.
+    # size 1.0, so min(1.0, 20.0) = 1.0 eaten. 19.0 remains. 0 items fully consumed.
     assert consumed == 0
     assert len(env.food_sources) == 2
-    assert any(f.energy == 19.5 for f in env.food_sources)
-    assert creature.energy == 10.5
+    assert any(f.energy == 19.0 for f in env.food_sources)
+    assert creature.energy == 11.0
 
 
 def test_environment_handle_eating_capped() -> None:
     """Tests that creatures are capped by food energy."""
     env = Environment(100, 100)
-    # size 1.5, but food only has 0.1 energy
-    creature = Creature(Genome({"size": 1.5, "speed": 0.0, "strength": 0.0}), x=50, y=50, energy=10)
+    # size 1.5 -> sum 1.5. Factor = 3.0/1.5 = 2.0. Normalized size = 3.0.
+    creature = Creature(
+        Genome({"size": 1.5, "speed": 0.0, "strength": 0.0}), x=50, y=50, energy=10
+    )
     env.add_creature(creature)
 
     env.food_sources.append(Food(50.0, 50.0, 0.1))
     consumed = env.handle_eating()
 
-    # energy = 10 (initial) + min(1.5, 0.1) = 10.1
-    # food is fully consumed because 1.5 > 0.1
+    # energy = 10 (initial) + min(3.0, 0.1) = 10.1
+    # food is fully consumed because 3.0 > 0.1
     assert consumed == 1
     assert creature.energy == 10.1
     assert len(env.food_sources) == 0
