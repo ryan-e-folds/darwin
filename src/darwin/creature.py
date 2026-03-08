@@ -52,15 +52,15 @@ class Creature:
         return self.genome.traits.get("strength", 0.1)
 
     def move(self, dx: float, dy: float) -> None:
-        """Moves the creature and consumes energy proportional to speed, size, and distance.
+        """Moves the creature and consumes energy proportional to size and distance.
 
         Args:
             dx (float): Change in x.
             dy (float): Change in y.
         """
         distance = (dx**2 + dy**2) ** 0.5
-        # Energy cost: base cost + cost proportional to speed, size and distance
-        cost = distance * (1.0 + self.speed * 5.0 + self.size * 3.0)
+        # Energy cost: distance moved plus a cost proportional to size
+        cost = distance + self.size
         self.energy -= cost
         self.x += dx
         self.y += dy

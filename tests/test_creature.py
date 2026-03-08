@@ -33,10 +33,9 @@ def test_creature_move() -> None:
 
     assert creature.x == 3.0
     assert creature.y == 4.0
-    # cost = distance * (1.0 + speed * 5.0 + size * 3.0)
-    # cost = 5.0 * (1.0 + 1.0 * 5.0 + 0.5 * 3.0)
-    # cost = 5.0 * (1.0 + 5.0 + 1.5) = 5.0 * 7.5 = 37.5
-    assert creature.energy == 62.5
+    # cost = distance + size
+    # cost = 5.0 + 0.5 = 5.5
+    assert creature.energy == 94.5
 
 
 def test_creature_reproduce_asexual() -> None:
