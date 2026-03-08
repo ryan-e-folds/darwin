@@ -24,7 +24,9 @@ class Evolution:
         self.steps = 0
         self.history: list[dict[str, float]] = []
 
-    def seed_population(self, count: int, initial_traits: dict[str, float] | None = None) -> None:
+    def seed_population(
+        self, count: int, initial_traits: dict[str, float] | None = None
+    ) -> None:
         """Creates an initial population of creatures with random positions and energy.
 
         Args:
@@ -40,11 +42,7 @@ class Evolution:
             # Base energy 100.0 with noise
             energy = 100.0 + random.uniform(-10, 10)
             creature = Creature(
-                genome, 
-                energy=energy, 
-                x=x, 
-                y=y, 
-                reproduce_sexually=reproduce_sexually
+                genome, energy=energy, x=x, y=y, reproduce_sexually=reproduce_sexually
             )
             self.environment.add_creature(creature)
 
@@ -91,11 +89,11 @@ class Evolution:
         new_borns = []
         already_reproduced = set()
         creatures = self.environment.creatures
-        
+
         for i, creature in enumerate(creatures):
             if creature in already_reproduced:
                 continue
-                
+
             if creature.energy > energy_threshold:
                 if creature.reproduce_sexually:
                     # Look for sexual partner nearby
@@ -103,15 +101,20 @@ class Evolution:
                     for j, potential_partner in enumerate(creatures):
                         if i == j or potential_partner in already_reproduced:
                             continue
-                        if not potential_partner.reproduce_sexually or potential_partner.energy <= energy_threshold:
+                        if (
+                            not potential_partner.reproduce_sexually
+                            or potential_partner.energy <= energy_threshold
+                        ):
                             continue
-                        
-                        dist = ((creature.x - potential_partner.x)**2 + 
-                                (creature.y - potential_partner.y)**2)**0.5
+
+                        dist = (
+                            (creature.x - potential_partner.x) ** 2
+                            + (creature.y - potential_partner.y) ** 2
+                        ) ** 0.5
                         if dist < partner_radius:
                             partner = potential_partner
                             break
-                    
+
                     if partner:
                         child = creature.reproduce(partner)
                         if child is not None:

@@ -107,8 +107,12 @@ def test_creature_fight_win() -> None:
     """Tests that a creature gains energy when winning a fight."""
     # attacker: strength=1.0, speed=0.0, size=0.5 (normalized)
     # defender: strength=0.0, speed=1.0, size=0.5 (normalized)
-    attacker = Creature(Genome({"strength": 1.0, "speed": 0.0, "size": 0.5}), energy=100.0)
-    defender = Creature(Genome({"strength": 0.0, "speed": 1.0, "size": 0.5}), energy=100.0)
+    attacker = Creature(
+        Genome({"strength": 1.0, "speed": 0.0, "size": 0.5}), energy=100.0
+    )
+    defender = Creature(
+        Genome({"strength": 0.0, "speed": 1.0, "size": 0.5}), energy=100.0
+    )
 
     # win_prob = 1.0 / (1.0 + 1.0) = 0.5
     # Force win by mocking random.random() to return 0.4
@@ -122,8 +126,12 @@ def test_creature_fight_win() -> None:
 
 def test_creature_fight_loss() -> None:
     """Tests that a creature loses energy when losing a fight."""
-    attacker = Creature(Genome({"strength": 1.0, "speed": 0.0, "size": 0.5}), energy=100.0)
-    defender = Creature(Genome({"strength": 0.0, "speed": 1.0, "size": 0.5}), energy=100.0)
+    attacker = Creature(
+        Genome({"strength": 1.0, "speed": 0.0, "size": 0.5}), energy=100.0
+    )
+    defender = Creature(
+        Genome({"strength": 0.0, "speed": 1.0, "size": 0.5}), energy=100.0
+    )
 
     # win_prob = 1.0 / (1.0 + 1.0) = 0.5
     # Force loss by mocking random.random() to return 0.6

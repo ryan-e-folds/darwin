@@ -6,6 +6,7 @@ from darwin.creature import Creature
 @dataclass
 class Food:
     """Represents a food source in the environment."""
+
     x: float
     y: float
     energy: float
@@ -52,13 +53,13 @@ class Environment:
         for _ in range(amount):
             x = random.uniform(0, self.width)
             y = random.uniform(0, self.height)
-            
+
             if energy_value is None:
                 # Base energy with noise
                 current_energy = 20.0 + random.uniform(-5, 5)
             else:
                 current_energy = energy_value
-                
+
             self.food_sources.append(Food(x, y, current_energy))
 
     def update(self) -> None:
@@ -99,8 +100,8 @@ class Environment:
                     amount_to_eat = min(creature.size, food.energy)
                     creature.eat(amount_to_eat)
                     food.energy -= amount_to_eat
-                    
-                if food.energy <= 1e-9: # Effectively consumed
+
+                if food.energy <= 1e-9:  # Effectively consumed
                     consumed_count += 1
                     break
 
