@@ -96,10 +96,8 @@ class Environment:
                     (creature.x - food.x) ** 2 + (creature.y - food.y) ** 2
                 ) ** 0.5
                 if distance <= detection_radius:
-                    # Amount eaten is the smallest of creature size or food energy
-                    amount_to_eat = min(creature.size, food.energy)
-                    creature.eat(amount_to_eat)
-                    food.energy -= amount_to_eat
+                    # Amount eaten is managed by the creature's eat method
+                    food.energy -= creature.eat(food.energy)
 
                 if food.energy <= 1e-9:  # Effectively consumed
                     consumed_count += 1

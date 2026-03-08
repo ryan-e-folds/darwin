@@ -73,8 +73,8 @@ class Evolution:
     def _move_creatures(self) -> None:
         """Randomly moves all creatures in the environment."""
         for creature in self.environment.creatures:
-            dx = random.uniform(-2, 2)
-            dy = random.uniform(-2, 2)
+            dx = random.uniform(-1, 1)
+            dy = random.uniform(-1, 1)
             creature.move(dx, dy)
 
     def _handle_fighting(self, fight_radius: float = 1.5) -> None:
@@ -120,7 +120,7 @@ class Evolution:
                     break
 
     def _handle_reproduction(
-        self, energy_threshold: float = 150.0, partner_radius: float = 2.0
+        self, energy_threshold: float = 100.0, partner_radius: float = 2.0
     ) -> None:
         """Handles sexual reproduction for creatures.
 
@@ -184,16 +184,14 @@ class Evolution:
         if not creatures:
             return {"step": self.steps, "population": 0}
 
-        avg_speed = sum(c.speed for c in creatures) / len(creatures)
         avg_size = sum(c.size for c in creatures) / len(creatures)
-        avg_strength = sum(c.strength for c in creatures) / len(creatures)
+        avg_attack = sum(c.attack for c in creatures) / len(creatures)
         avg_energy = sum(c.energy for c in creatures) / len(creatures)
 
         return {
             "step": self.steps,
             "population": float(len(creatures)),
-            "avg_speed": avg_speed,
             "avg_size": avg_size,
-            "avg_strength": avg_strength,
+            "avg_attack": avg_attack,
             "avg_energy": avg_energy,
         }
