@@ -1,4 +1,6 @@
 from darwin.evolution import Evolution
+from darwin.creature import Creature
+from darwin.genome import Genome
 import pytest
 
 
@@ -20,19 +22,17 @@ def test_evolution_seed_population() -> None:
         assert creature.speed == pytest.approx(3.0)
 
 
-def test_evolution_seed_population_random_sexuality() -> None:
-    """Tests that reproduce_sexually is randomly assigned."""
+def test_evolution_seed_population_random_sex() -> None:
+    """Tests that sex is randomly assigned."""
     evo = Evolution()
-    # Seed a large enough population to almost guarantee both True and False
+    # Seed a large enough population to almost guarantee both M and F
     evo.seed_population(count=100, initial_traits={"speed": 0.5})
 
-    sexual_count = sum(1 for c in evo.environment.creatures if c.reproduce_sexually)
-    asexual_count = sum(
-        1 for c in evo.environment.creatures if not c.reproduce_sexually
-    )
+    m_count = sum(1 for c in evo.environment.creatures if c.sex == "M")
+    f_count = sum(1 for c in evo.environment.creatures if c.sex == "F")
 
-    assert sexual_count > 0
-    assert asexual_count > 0
+    assert m_count > 0
+    assert f_count > 0
 
 
 def test_evolution_seed_population_energy_noise() -> None:
@@ -107,3 +107,63 @@ def test_evolution_run_and_history() -> None:
     for i, entry in enumerate(evo.history):
         assert entry["step"] == i + 1
         assert "population" in entry
+
+
+def test_evolution_handle_fighting() -> None:
+    """Tests that _handle_fighting results in energy exchange between close creatures of same sex."""
+    evo = Evolution(width=100, height=100)
+    # Place two creatures of same sex very close to each other
+    c1 = Creature(Genome(), energy=100.0, x=10.0, y=10.0, sex="M")
+    c2 = Creature(Genome(), energy=100.0, x=10.5, y=10.5, sex="M")
+    evo.environment.add_creature(c1)
+    evo.environment.add_creature(c2)
+
+    evo._handle_fighting(fight_radius=2.0)
+
+    # One should have 150.0 and the other 50.0 (half energy exchange)
+    energies = {c1.energy, c2.energy}
+    assert energies == {150.0, 50.0}
+
+
+def test_evolution_handle_fighting_opposite_sex() -> None:
+    """Tests that _handle_fighting ignores close creatures of opposite sex."""
+    evo = Evolution(width=100, height=100)
+    # Place two creatures of opposite sex very close to each other
+    c1 = Creature(Genome(), energy=100.0, x=10.0, y=10.0, sex="M")
+    c2 = Creature(Genome(), energy=100.0, x=10.5, y=10.5, sex="F")
+    evo.environment.add_creature(c1)
+    evo.environment.add_creature(c2)
+
+    evo._handle_fighting(fight_radius=2.0)
+
+    # No energy exchange should have happened
+    assert c1.energy == 100.0
+    assert c2.energy == 100.0
+
+
+def test_evolution_handle_reproduction_sexual_opposite_sex() -> None:
+    """Tests that sexual reproduction occurs between opposite sex partners."""
+    evo = Evolution(width=100, height=100)
+    c1 = Creature(Genome(), energy=200.0, x=10.0, y=10.0, sex="M")
+    c2 = Creature(Genome(), energy=200.0, x=10.5, y=10.5, sex="F")
+    evo.environment.add_creature(c1)
+    evo.environment.add_creature(c2)
+
+    evo._handle_reproduction(energy_threshold=150.0, partner_radius=2.0)
+
+    # Population should be 3 (parents + child)
+    assert len(evo.environment.creatures) == 3
+
+
+def test_evolution_handle_reproduction_sexual_same_sex() -> None:
+    """Tests that sexual reproduction ignores same-sex partners."""
+    evo = Evolution(width=100, height=100)
+    c1 = Creature(Genome(), energy=200.0, x=10.0, y=10.0, sex="M")
+    c2 = Creature(Genome(), energy=200.0, x=10.5, y=10.5, sex="M")
+    evo.environment.add_creature(c1)
+    evo.environment.add_creature(c2)
+
+    evo._handle_reproduction(energy_threshold=150.0, partner_radius=2.0)
+
+    # Population should still be 2
+    assert len(evo.environment.creatures) == 2
