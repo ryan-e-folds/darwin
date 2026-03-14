@@ -11,12 +11,15 @@ class Creature:
         id (str): A unique identifier for the creature.
         genome (Genome): The genetic information of the creature.
         energy (float): Current energy levels. If it reaches 0, the creature dies.
+        age (int): The current age of the creature (number of moves/steps).
         x (float): X-coordinate in the environment.
         y (float): Y-coordinate in the environment.
         mother_id (str | None): ID of the mother.
         father_id (str | None): ID of the father.
         offspring_ids (list[str]): List of unique IDs of offspring.
     """
+
+    ADVANCED_AGE = 100
 
     def __init__(
         self,
@@ -40,6 +43,7 @@ class Creature:
         self.id = str(uuid.uuid4())
         self.genome = genome
         self.energy = energy
+        self.age = 0
         self.x = x
         self.y = y
         self.mother_id = mother_id
@@ -69,13 +73,21 @@ class Creature:
     def move(self, dx: float, dy: float) -> None:
         """Moves the creature and consumes energy proportional to distance and size.
 
+        Increments age and increases energy cost if advanced age is reached.
+
         Args:
             dx (float): Change in x.
             dy (float): Change in y.
         """
+        self.age += 1
         distance = (dx**2 + dy**2) ** 0.5
         # Energy cost: distance moved plus a cost proportional to size
         cost = distance + self.size
+
+        # If advanced age is reached, energy depletes twice as fast
+        if self.age > self.ADVANCED_AGE:
+            cost *= 2.0
+
         self.energy -= cost
         self.x += dx
         self.y += dy

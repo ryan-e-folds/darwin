@@ -26,8 +26,8 @@ def test_environment_handle_eating() -> None:
 
     consumed = env.handle_eating(detection_radius=2.0)
 
-    # size 0.5, so min(0.5, 20.0) = 0.5 eaten. 19.5 remains.
+    # size 0.5, so min(1.5, 20.0) = 1.5 eaten. 18.5 remains.
     assert consumed == 0
     assert len(env.food_sources) == 2
-    assert any(f.energy == 19.5 for f in env.food_sources)
-    assert creature.energy == 10.5
+    assert any(f.energy == 18.5 for f in env.food_sources)
+    assert creature.energy == 11.5
