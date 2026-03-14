@@ -11,6 +11,7 @@ def test_creature_init() -> None:
 
     assert creature.genome == genome
     assert creature.energy == 50.0
+    assert creature.age == 0
     assert creature.x == 10.0
     assert creature.y == 20.0
     assert creature.size == 0.8
@@ -30,8 +31,28 @@ def test_creature_move() -> None:
 
     assert creature.x == 3.0
     assert creature.y == 4.0
+    assert creature.age == 1
     # cost = distance + size = 5.0 + 0.5 = 5.5
     assert creature.energy == 94.5
+
+
+def test_creature_aging() -> None:
+    """Tests that age increments and energy depletion increases after ADVANCED_AGE."""
+    genome = Genome({"size": 0.5})
+    creature = Creature(genome, energy=1000.0)
+
+    # Set age to just before advanced age
+    creature.age = creature.ADVANCED_AGE
+
+    # Next move should still be normal cost (age will become ADVANCED_AGE + 1)
+    # Wait, in my implementation:
+    # self.age += 1
+    # if self.age > self.ADVANCED_AGE: cost *= 2.0
+    # So if age was ADVANCED_AGE, it becomes ADVANCED_AGE + 1, which IS > ADVANCED_AGE.
+
+    creature.move(3.0, 4.0)  # distance = 5.0, cost = 5.5 * 2 = 11.0
+    assert creature.age == creature.ADVANCED_AGE + 1
+    assert creature.energy == 1000.0 - 11.0
 
 
 def test_creature_reproduce_sexual() -> None:
